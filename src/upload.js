@@ -12,7 +12,18 @@ const UploadPage = () => {
     const navigate = useNavigate();
 
     const handleFileChange = (event) => {
+        console.log("File changed!");
         setFile(event.target.files[0]);
+        console.log(file);
+        /*var reader = new FileReader();
+        reader.onload = (
+          function(theFile) { 
+            return function(e) { 
+              console.log(file.name);
+              document.getElementById('list').innerHTML = ['<img src="', e.target.result,'" title="', theFile.name, '" width="50" />'].join('"'); 
+            }; 
+		})(file);
+	reader.readAsDataURL(file);*/
     };
 
     const handleFileUpload = () => {
@@ -50,7 +61,13 @@ const UploadPage = () => {
           </div>
           <br></br>
           <div>
-            <input type="file" onChange={handleFileChange} />
+            <input type="file" accept="image/png, image/jpeg, image/jpg" onChange={handleFileChange} />
+            <br></br>
+            {file && 
+<img width={"60%"}
+              src={URL.createObjectURL(file)}
+            />
+            }
             <br></br>
             <input class="upload" type="button" value="Submit" onClick={() => {handleFileUpload()}} />
           </div>
