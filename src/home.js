@@ -10,13 +10,13 @@ const HomePage = () => {
     <div>
         <h1>TITLE</h1>
         <p>Description here.</p>
-        <input type="button" class="upload" value="Upload a map" onClick={() => {navigate('/upload');}} />
-        <br></br>
-        <input type="button" class="login" value="Log into account" onClick={() => {navigate('/login');}} />
-        <br></br>
-        <input type="button" class="register" value="Register an account" onClick={() => {navigate('/register');}} />
-        <br></br>
-        <input type="button" class="savedmaps" value="See saved maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/'}})}} />
+        {sessionStorage.getItem("token") != null && <input type="button" class="upload" value="Upload a map" onClick={() => {navigate('/upload');}} />}
+        {sessionStorage.getItem("token") != null && <br></br>}
+        {sessionStorage.getItem("token") == null && <input type="button" class="login" value="Log into account" onClick={() => {navigate('/login');}} />}
+        {sessionStorage.getItem("token") == null && <br></br>}
+        {sessionStorage.getItem("token") == null && <input type="button" class="register" value="Register an account" onClick={() => {navigate('/register');}} />}
+        {sessionStorage.getItem("token") == null && <br></br>}
+        {sessionStorage.getItem("token") != null && <input type="button" class="savedmaps" value="See saved maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/'}})}} />}
     </div>);
 };
 

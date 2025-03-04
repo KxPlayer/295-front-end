@@ -2,7 +2,7 @@ import "./css/acctSubmit.css";
 import React, {useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-// need to setup check for valid email, username and password
+// need to setup check for valid email, username and password?
 
 const RegistrationPage = () => {
     const [email, setEmail] = useState("");
@@ -15,6 +15,8 @@ const RegistrationPage = () => {
         try{
             const response = await axios.post('http://localhost:8080/api/user', { email, username, password });
             console.log(response.data);
+            // should check for valid registration before redirecting
+            navigate('/home');
         }catch(err){
             console.error(err);
         }

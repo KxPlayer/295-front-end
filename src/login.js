@@ -2,7 +2,7 @@ import "./css/acctSubmit.css";
 import React, {useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-//need to handle click for submission
+
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,10 +12,12 @@ const LoginPage = () => {
     const handleClick = async () => {
         try{
             const response = await axios.post('http://localhost:8080/api/user/login', { email, password });
-            console.log(response.data); // need to save token here, check if exists, else do not redirect to home
+            console.log(response.data);
             const { token } = response.data;
-            // Store the token in localStorage or sessionStorage, use local for now
-            localStorage.setItem('token', token);
+            sessionStorage.setItem('token', token);
+            if(token){
+                navigate('/');
+            }
         }catch(err){
             console.error(err);
         }
