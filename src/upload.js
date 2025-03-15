@@ -1,48 +1,65 @@
 import "./css/upload.css";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-//change upload button to something better
-//need to pass info from upload page to uploaded map
 //floor is not used, need to talk to daniel about it
 //need to add loading message since this takes like 20 seconds
 
 const UploadPage = () => {
     const [file, setFile] = useState(null);
-    const [building, setBuilding] = useState('');
+    const [buildings, setBuildings] = useState([]);
+    const [buildingName, setBuildingName] = useState('');
     const [floor, setFloor] = useState(null);
     const [validSubmit, setValidSubmit] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
-    const updateValidSubmit = (building, floor, file) => {
-      setValidSubmit(building.length > 0 && floor != null && file);
+    useEffect(() => {
+      loadBuildings();
+    }, []);
+
+    const loadBuildings = async () => {
+      try{
+        const token = sessionStorage.getItem('token');
+        const response = await axios.get('http://localhost:8080/api/buildings', {
+          headers: {
+            'Authorization': token
+          }
+        });
+        setBuildings(response.data.buildings);
+      }catch(err){
+        console.error(err);
+      }
+    };
+
+    const updateValidSubmit = (buildingName, floor, file) => {
+      setValidSubmit(buildingName.length > 0 && floor != null && file);
     }
 
     const updateBuilding = (value) => {
-      setBuilding(value);
+      setBuildingName(value);
       updateValidSubmit(value, floor, file);  
     }
 
     const updateFloor = (value) => {
       setFloor(value); 
-      updateValidSubmit(building, value, file);  
+      updateValidSubmit(buildingName, value, file);  
     }
 
     const handleFileChange = (event) => {
       setFile(event.target.files[0]);
-      updateValidSubmit(building, floor, event.target.files[0]);  
+      updateValidSubmit(buildingName, floor, event.target.files[0]);  
     }
 
     const handleBuildingUpload = async () => {
-      console.log("Trying to upload building");
       try{
         const token = sessionStorage.getItem('token');
 
         const response = await axios.post('http://localhost:8080/api/building', 
         { 
-          "name": building 
+          "name": buildingName 
         }, 
         { 
           headers:{
@@ -50,7 +67,6 @@ const UploadPage = () => {
           } 
         });
 
-        console.log(response.data);
         return response.data.building_id;
     }catch(err){
         console.error(err);
@@ -58,8 +74,8 @@ const UploadPage = () => {
     };
 
     const handleFileUpload = async (buildingId) => {
-      // need to wait for building upload to finish
         if (file) {
+          setLoading(true);
           const formData = new FormData();
           formData.append('file', file);
           formData.append('building_id', buildingId);
@@ -67,20 +83,20 @@ const UploadPage = () => {
           formData.append('floor', floor);
 
           try {
-            
             const token = sessionStorage.getItem('token');
 
             const response = await axios.post('http://localhost:8080/api/upload_image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    'Authorization': token,
+                    'Authorization': token
                 },
             });
 
-            console.log(response.data);
+            let imageData = JSON.parse(response.data.imageData);
+
             sessionStorage.setItem('s3_url', response.data.s3_url);
-            sessionStorage.setItem('uploadedBuilding', building);
-            sessionStorage.setItem('uploadedFloor', floor);
+            sessionStorage.setItem('uploaded_image_id', imageData._id.$oid);
+            
             navigate('/uploadedMap');
 
           } catch (error) {
@@ -91,12 +107,28 @@ const UploadPage = () => {
 
       const handleSubmit = async () => {
         try{
-          const buildingId = await handleBuildingUpload();
+          let found = false;
+          let buildingId = null;
+          buildings.forEach(building => {
+            if(building.name === buildingName){
+              buildingId = building.id;
+              found = true;
+            }
+          });
+
+          if(!found){
+            buildingId = await handleBuildingUpload();
+          }
+          
           await handleFileUpload(buildingId);
         }catch(err){
           console.error(err);
         }
       };
+
+      if(loading){
+        return <h1>UPLOADING...</h1>
+      }
 
       return (
         <div>

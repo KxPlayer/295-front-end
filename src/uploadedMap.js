@@ -3,11 +3,13 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-// need to pass floor and building name to this page
-// need to setup pathfinding
+// need to get the relative location of the rooms to pass to the backend
+// add loading message after the user clicks find path
+// add boxes to highlight selected rooms -> start and end points, remove the circles
+// remove setting start and end points
 
 const UploadedMapPage = () => {
-    const [mapInfo, setMapInfo] = useState({"building":"", "floor":NaN});
+    const [image, setImage] = useState(null);
     const [startPoint, setStartPoint] = useState(null);
     const [settingStartPoint, setSettingStartPoint] = useState(false);
     const [endPoint, setEndPoint] = useState(null);
@@ -19,8 +21,23 @@ const UploadedMapPage = () => {
     const location = useLocation();
 
     useEffect(() => {
-         setMapInfo(location.state);
-    }, [location.state]);
+        loadImage();
+    }, []);
+
+    const loadImage = async () => {
+        try{
+            const token = sessionStorage.getItem('token');
+            const response = await axios.get('http://localhost:8080/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
+                headers:{
+                    'Authorization':token
+                }
+            });
+            setImage(response.data.image);
+            console.log(response.data.image);
+        }catch(err){
+            console.error(err);
+        }
+    }
 
     const handleImageLoad = () => {
         let img = document.getElementById('map'); 
@@ -28,14 +45,20 @@ const UploadedMapPage = () => {
         setOriginalImageSize({"width":img.naturalWidth, "height":img.naturalHeight});
     };
 
-    const updateImage = (url) => {
+    const updateDisplayedImage = (url) => {
         let img = document.getElementById('map');
         img.src = url;
     }
 
+    const handleSelectStart = (event) => {
+        console.log("Start selected" + event.target.value);
+    }
+
+    const handleSelectEnd = (event) => {
+        console.log("End selected" + event.target.value);
+    }
+
     const handleFindPath = async () => {
-        console.log("Finding path");
-        // send start and end points to backend
         if(!startPoint || !endPoint){
             console.log("Start and end points not set");
             return;
@@ -47,27 +70,52 @@ const UploadedMapPage = () => {
             { 
                 "start_point": [parseInt(startPoint[1] * originalImageSize.height), parseInt(startPoint[0] * originalImageSize.width)],
                 "end_point": [parseInt(endPoint[1] * originalImageSize.height), parseInt(endPoint[0] * originalImageSize.width)],
-                "s3_image_url": sessionStorage.getItem("s3_url")
+                "s3_image_url": image.url
             },{
                 headers:{
                     'Authorization':token
                 }
             });
 
-            console.log(response.data);
-            updateImage(response.data.path_image_url)
+            updateDisplayedImage(response.data.path_image_url)
         }catch(err){
             console.error(err);
         }
+    }
+
+    while(image == null){
+        return <h1>LOADING UPLOADED IMAGE...</h1>
     }
 
     return (
     <div>
         <input type="button" value="Back" onClick={() => navigate('/upload')} />
         
-        <h1>Building: {sessionStorage.getItem("uploadedBuilding")}, Floor: {sessionStorage.getItem("uploadedFloor")}</h1>
+        <h1>Building: {image.building.name}, Floor: {image.floor}</h1>
+        <div>
+        <div>
+            <select onChange={handleSelectStart}>
+                <option value="">Select a starting room</option>
+                {image.anchors.map(anchor => {
+                    if(anchor.classType === 'classroom' && anchor.tags.length > 0){
+                        return <option value={anchor.room}>{anchor.tags.join('')}</option>;
+                    }
 
-        <div class="mapBox" style={{position:"relative"}} onClick={(e) => {
+                    return;
+                })}
+            </select>
+            <select onChange={handleSelectEnd}>
+                <option value="">Select a destination room</option>
+                {image.anchors.map(anchor => {
+                    if(anchor.classType === 'classroom' && anchor.tags.length > 0){
+                        return <option value={anchor.room}>{anchor.tags.join('')}</option>;
+                    }
+                    return;
+                })}
+            </select>
+        </div>
+
+        <div className="mapBox" style={{position:"relative"}} onClick={(e) => {
             var rect = e.target.getBoundingClientRect();
             var x = Math.max(0, e.clientX - rect.left) / imageSize.width;
             var y = Math.max(0, e.clientY - rect.top) / imageSize.height;
@@ -82,7 +130,7 @@ const UploadedMapPage = () => {
             
             }}>
 
-            <img id="map" src={sessionStorage.getItem("s3_url")} style={{width:"50%"}} onLoad={handleImageLoad}/>
+            <img id="map" alt="A map" src={image.url} style={{width:"50%"}} onLoad={handleImageLoad}/>
 
             <svg style={{position:"absolute", left:"25%", top:0, width:"50%", height:"100%", pointerEvents: "none"}}>
             {startPoint && <circle id="circle1" cx={startPoint[0] * imageSize.width} cy={startPoint[1] * imageSize.height} r="4" style={{"fill":"green"}} />}
@@ -90,15 +138,16 @@ const UploadedMapPage = () => {
             </svg>  
             
         </div>
-        
+        </div>
         <div>
-            <input class="setter" type="button" value="Set Start" onClick={() => {setSettingStartPoint(true); setSettingEndPoint(false);}} />
-            <input class="setter" type="button" value="Set End" onClick={() => {setSettingStartPoint(false); setSettingEndPoint(true);}} />
-            <input class="path" type="button" value="Find Path" onClick={() => {handleFindPath(); setSettingStartPoint(false); setSettingEndPoint(false);}} />
-            <input class="reset" type="button" value="Reset Start & End" onClick={() => {setSettingStartPoint(false); setSettingEndPoint(false); setStartPoint(null); setEndPoint(null); updateImage(sessionStorage.getItem("s3_url"));}} />
-            <input class="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
+            <input className="setter" type="button" value="Set Start" onClick={() => {setSettingStartPoint(true); setSettingEndPoint(false);}} />
+            <input className="setter" type="button" value="Set End" onClick={() => {setSettingStartPoint(false); setSettingEndPoint(true);}} />
+            <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath(); setSettingStartPoint(false); setSettingEndPoint(false);}} />
+            <input className="reset" type="button" value="Reset Start & End" onClick={() => {setSettingStartPoint(false); setSettingEndPoint(false); setStartPoint(null); setEndPoint(null); updateDisplayedImage(image.url);}} />
+            <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
         </div>
     </div>);
+
 };
 
 export default UploadedMapPage;

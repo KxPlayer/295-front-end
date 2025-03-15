@@ -30,11 +30,3 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
-
-/* <Route exact path="/schedule/:id" element={<ViewSchedule />} />
-<Route exact path="/member" element={<ViewMemberPage />} />
-<Route
-  exact
-  path="/member/tickets"
-  element={<ViewPurchasedTickets />}
-/>*/
