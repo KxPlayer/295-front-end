@@ -3,9 +3,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-//floor is not used, need to talk to daniel about it
-//need to add loading message since this takes like 20 seconds
-
 const UploadPage = () => {
     const [file, setFile] = useState(null);
     const [buildings, setBuildings] = useState([]);
@@ -126,6 +123,10 @@ const UploadPage = () => {
         }
       };
 
+      if(sessionStorage.getItem('token') == null){
+        return <><p>You must be logged in to view this page.</p><a href="/login">Login</a></>;
+      }
+
       if(loading){
         return <h1>UPLOADING...</h1>
       }
@@ -133,7 +134,7 @@ const UploadPage = () => {
       return (
         <div>
           <input type="button" value="Back" onClick={() => {navigate('/')}} />
-          <p>DESCRIPTION</p>
+          <p>Provide a building name, floor number, and an image of the map you want to do pathfinding on. Avoid glare and make sure the image is right-side up to ensure proper results!</p>
           <div>
             <span>Building name: </span>
             <input onChange={ev => updateBuilding(ev.target.value)}/>

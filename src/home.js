@@ -9,7 +9,7 @@ const HomePage = () => {
     return (
     <div>
         <h1>TITLE</h1>
-        <p>Description here.</p>
+        <p>A computer vision-based pathfinding web application.</p>
         {sessionStorage.getItem("token") != null && <input type="button" class="upload" value="Upload a map" onClick={() => {navigate('/upload');}} />}
         {sessionStorage.getItem("token") != null && <br></br>}
         {sessionStorage.getItem("token") == null && <input type="button" class="login" value="Log into account" onClick={() => {navigate('/login');}} />}

@@ -3,8 +3,6 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-// loading message?
-
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -14,7 +12,7 @@ const LoginPage = () => {
     const handleClick = async () => {
         try{
             const response = await axios.post('http://localhost:8080/api/user/login', { email, password });
-            console.log(response.data);
+            // check if token is correct?
             const { token } = response.data;
             sessionStorage.setItem('token', token);
             if(token){

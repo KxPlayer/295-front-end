@@ -48,13 +48,17 @@ const SavedBuildingsPage = () => {
         }
     }
 
+    if(sessionStorage.getItem('token') == null){
+        return <><p>You must be logged in to view this page.</p><a href="/login">Login</a></>;
+    }
+
     if(location.state == null){
         return (<h1>ERROR</h1>);
     }else{
         previous = location.state.previous;
     }
 
-    while(buildings == null){
+    if(buildings == null){
         return (<h1>LOADING BUILDINGS...</h1>);
     }
     

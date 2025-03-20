@@ -14,16 +14,6 @@ const SavedMapsListPage = () => {
         loadMaps();
     }, []);
 
-    if(location.state == null){
-        return (<h1>ERROR</h1>);
-    }else{
-        previous = location.state.previous;
-    }
-
-    if(maps == null){
-        return (<h1>LOADING MAPS...</h1>);
-    }
-
     const loadMaps = async () => {
         try{
             const token = sessionStorage.getItem('token');
@@ -64,8 +54,18 @@ const SavedMapsListPage = () => {
         }
     }
 
-    while(maps == null){
-        return (<h1>Loading...</h1>);
+    if(sessionStorage.getItem('token') == null){
+        return <><p>You must be logged in to view this page.</p><a href="/login">Login</a></>;
+    }
+
+    if(maps == null){
+        return (<h1>LOADING MAPS...</h1>);
+    }
+
+    if(location.state == null){
+        return (<h1>ERROR</h1>);
+    }else{
+        previous = location.state.previous;
     }
 
     return (
@@ -75,12 +75,12 @@ const SavedMapsListPage = () => {
             {maps.map(map => {
                 return <div class="box" onClick={() => {navigate('/savedMap', {state:{previous:previous, buildingName:location.state.buildingName, buildingId:location.state.buildingId, mapId:map.id}})}}>
                             <h1>Floor {map.floor}</h1>
-                            <input class="delete" type='button' onClick={(event) => {event.stopPropagation(); deleteMap(map.id)}} value="X"/>
+                            {sessionStorage.getItem("uploaded_image_id") !== map.id ? <input class="delete" type='button' onClick={(event) => {event.stopPropagation(); deleteMap(map.id)}} value="X"/> : "Newly uploaded!"}
                         </div>
+                        
             })}
         </div>);
 
 };
 
 export default SavedMapsListPage;
-

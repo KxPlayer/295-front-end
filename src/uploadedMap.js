@@ -1,7 +1,7 @@
 import "./css/map.css";
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 // need to get the relative location of the rooms to pass to the backend
 // add loading message after the user clicks find path
@@ -10,18 +10,28 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 const UploadedMapPage = () => {
     const [image, setImage] = useState(null);
-    const [startPoint, setStartPoint] = useState(null);
-    const [settingStartPoint, setSettingStartPoint] = useState(false);
-    const [endPoint, setEndPoint] = useState(null);
-    const [settingEndPoint, setSettingEndPoint] = useState(false);
+    const [startRoom, setStartRoom] = useState(null);
+    const [endRoom, setEndRoom] = useState(null);
+    const [hideBoxes, sethideBoxes] = useState(false);
     const [imageSize, setImageSize] = useState({"width":0, "height":0});
     const [originalImageSize, setOriginalImageSize] = useState({"width":0, "height":0});
 
     const navigate = useNavigate();
-    const location = useLocation();
+
+    const updateBoxes = () => {
+        let img = document.getElementById('map'); 
+        setImageSize({"width":img.width, "height":img.height});
+    };
 
     useEffect(() => {
         loadImage();
+        window.addEventListener('resize', updateBoxes);
+
+        return () => {
+            window.removeEventListener('resize', updateBoxes);
+        };
+
+
     }, []);
 
     const loadImage = async () => {
@@ -33,7 +43,6 @@ const UploadedMapPage = () => {
                 }
             });
             setImage(response.data.image);
-            console.log(response.data.image);
         }catch(err){
             console.error(err);
         }
@@ -51,15 +60,25 @@ const UploadedMapPage = () => {
     }
 
     const handleSelectStart = (event) => {
-        console.log("Start selected" + event.target.value);
+        if(event.target.value === ""){
+            setStartRoom(null);
+            return;
+        }
+        console.log(event.target.value);
+        setStartRoom(JSON.parse(event.target.value));
     }
 
     const handleSelectEnd = (event) => {
-        console.log("End selected" + event.target.value);
+        if(event.target.value === ""){
+            setEndRoom(null);
+            return;
+        }
+        console.log(event.target.value);
+        setEndRoom(JSON.parse(event.target.value));
     }
 
     const handleFindPath = async () => {
-        if(!startPoint || !endPoint){
+        if(!startRoom || !endRoom){
             console.log("Start and end points not set");
             return;
         }
@@ -68,8 +87,8 @@ const UploadedMapPage = () => {
             const token = sessionStorage.getItem('token');
             const response = await axios.post('http://localhost:8080/api/calculate_path', 
             { 
-                "start_point": [parseInt(startPoint[1] * originalImageSize.height), parseInt(startPoint[0] * originalImageSize.width)],
-                "end_point": [parseInt(endPoint[1] * originalImageSize.height), parseInt(endPoint[0] * originalImageSize.width)],
+                "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
+                "end_point": [parseInt(endRoom.tagData[0].y * originalImageSize.height), parseInt(endRoom.tagData[0].x * originalImageSize.width)],
                 "s3_image_url": image.url
             },{
                 headers:{
@@ -83,7 +102,11 @@ const UploadedMapPage = () => {
         }
     }
 
-    while(image == null){
+    if(sessionStorage.getItem('token') == null){
+        return <><p>You must be logged in to view this page.</p><a href="/login">Login</a></>;
+    }
+
+    if(image == null){
         return <h1>LOADING UPLOADED IMAGE...</h1>
     }
 
@@ -91,59 +114,47 @@ const UploadedMapPage = () => {
     <div>
         <input type="button" value="Back" onClick={() => navigate('/upload')} />
         
-        <h1>Building: {image.building.name}, Floor: {image.floor}</h1>
+        <h1>Building: {image.building.name}, Floor: {image.floor < 0 ? "B" : ""}{Math.abs(image.floor)}</h1>
         <div>
         <div>
             <select onChange={handleSelectStart}>
                 <option value="">Select a starting room</option>
                 {image.anchors.map(anchor => {
-                    if(anchor.classType === 'classroom' && anchor.tags.length > 0){
-                        return <option value={anchor.room}>{anchor.tags.join('')}</option>;
+                    if(anchor.classType === 'classroom' && anchor.tagData.length > 0){
+                        return <option value={JSON.stringify(anchor)}>{anchor.tagData.map(t => t.text).join(', ')}</option>;
                     }
-
-                    return;
                 })}
             </select>
             <select onChange={handleSelectEnd}>
                 <option value="">Select a destination room</option>
                 {image.anchors.map(anchor => {
-                    if(anchor.classType === 'classroom' && anchor.tags.length > 0){
-                        return <option value={anchor.room}>{anchor.tags.join('')}</option>;
+                    if(anchor.classType === 'classroom' && anchor.tagData.length > 0){
+                        return <option value={JSON.stringify(anchor)}>{anchor.tagData.map(t => t.text).join(', ')}</option>;
                     }
-                    return;
                 })}
             </select>
         </div>
 
-        <div className="mapBox" style={{position:"relative"}} onClick={(e) => {
-            var rect = e.target.getBoundingClientRect();
-            var x = Math.max(0, e.clientX - rect.left) / imageSize.width;
-            var y = Math.max(0, e.clientY - rect.top) / imageSize.height;
-
-            if(settingStartPoint){
-                setStartPoint([x, y]);
-                setSettingStartPoint(false);
-            }else if(settingEndPoint){
-                setEndPoint([x, y]);
-                setSettingEndPoint(false);
-            }
-            
-            }}>
-
+        <div className="mapBox" style={{position:"relative"}}>
             <img id="map" alt="A map" src={image.url} style={{width:"50%"}} onLoad={handleImageLoad}/>
 
             <svg style={{position:"absolute", left:"25%", top:0, width:"50%", height:"100%", pointerEvents: "none"}}>
-            {startPoint && <circle id="circle1" cx={startPoint[0] * imageSize.width} cy={startPoint[1] * imageSize.height} r="4" style={{"fill":"green"}} />}
-            {endPoint && <circle id="circle1" cx={endPoint[0] * imageSize.width} cy={endPoint[1] * imageSize.height} r="4" style={{"fill":"red"}} />}
+            
+            {!hideBoxes && <>{image.anchors.map(anchor => {   
+                if(anchor.classType === 'classroom'){
+                    return <rect x={anchor.x * (imageSize.width / originalImageSize.width) - 0.5 * anchor.width * (imageSize.width / originalImageSize.width)} y={anchor.y * (imageSize.height / originalImageSize.height) - 0.5 * anchor.height * (imageSize.height / originalImageSize.height)} width={anchor.width * (imageSize.width / originalImageSize.width)} height={anchor.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"black", strokeWidth:"2"}} />
+                }
+            })}</>}
+            {startRoom && <rect x={startRoom.x * (imageSize.width / originalImageSize.width) - 0.5 * startRoom.width * (imageSize.width / originalImageSize.width)} y={startRoom.y * (imageSize.height / originalImageSize.height) - 0.5 * startRoom.height * (imageSize.height / originalImageSize.height)} width={startRoom.width * (imageSize.height / originalImageSize.height)} height={startRoom.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"green", strokeWidth:"2"}} />}
+            {endRoom && <rect x={endRoom.x * (imageSize.width / originalImageSize.width) - 0.5 * endRoom.width * (imageSize.width / originalImageSize.width)} y={endRoom.y * (imageSize.height / originalImageSize.height) - 0.5 * endRoom.height * (imageSize.height / originalImageSize.height)} width={endRoom.width * (imageSize.height / originalImageSize.height)} height={endRoom.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"red", strokeWidth:"2"}} />}
+            
             </svg>  
             
         </div>
         </div>
-        <div>
-            <input className="setter" type="button" value="Set Start" onClick={() => {setSettingStartPoint(true); setSettingEndPoint(false);}} />
-            <input className="setter" type="button" value="Set End" onClick={() => {setSettingStartPoint(false); setSettingEndPoint(true);}} />
-            <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath(); setSettingStartPoint(false); setSettingEndPoint(false);}} />
-            <input className="reset" type="button" value="Reset Start & End" onClick={() => {setSettingStartPoint(false); setSettingEndPoint(false); setStartPoint(null); setEndPoint(null); updateDisplayedImage(image.url);}} />
+        <div><input type="checkbox" id="showBoxes" name="showBoxes" onChange={() => {sethideBoxes(!hideBoxes);}} /><label for="showBoxes">Hide unselected boxes</label></div>
+        <div>        
+            <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} />
             <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
         </div>
     </div>);

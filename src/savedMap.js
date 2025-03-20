@@ -84,6 +84,10 @@ const SavedMapPage = () => {
         }
     };
 
+    if(sessionStorage.getItem('token') == null){
+        return <><p>You must be logged in to view this page.</p><a href="/login">Login</a></>;
+    }
+
     if(location.state == null){
         return (<h1>ERROR</h1>);
     }else{
