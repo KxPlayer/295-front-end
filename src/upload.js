@@ -53,7 +53,7 @@ const UploadPage = () => {
     const handleBuildingUpload = async () => {
       try{
         const token = sessionStorage.getItem('token');
-
+        
         const response = await axios.post('http://localhost:8080/api/building', 
         { 
           "name": buildingName 
@@ -63,7 +63,6 @@ const UploadPage = () => {
             'Authorization':token
           } 
         });
-
         return response.data.building_id;
     }catch(err){
         console.error(err);
@@ -81,14 +80,14 @@ const UploadPage = () => {
 
           try {
             const token = sessionStorage.getItem('token');
-
+            sessionStorage.setItem("upload_start_time", Date.now());
             const response = await axios.post('http://localhost:8080/api/upload_image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': token
                 },
             });
-
+            sessionStorage.setItem("image_upload_time", Date.now() - sessionStorage.getItem("upload_start_time"));
             let imageData = JSON.parse(response.data.imageData);
 
             sessionStorage.setItem('s3_url', response.data.s3_url);

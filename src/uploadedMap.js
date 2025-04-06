@@ -18,11 +18,6 @@ const UploadedMapPage = () => {
 
     const navigate = useNavigate();
 
-    const updateBoxes = () => {
-        let img = document.getElementById('map'); 
-        setImageSize({"width":img.width, "height":img.height});
-    };
-
     useEffect(() => {
         loadImage();
         window.addEventListener('resize', updateBoxes);
@@ -30,23 +25,28 @@ const UploadedMapPage = () => {
         return () => {
             window.removeEventListener('resize', updateBoxes);
         };
-
-
     }, []);
 
     const loadImage = async () => {
         try{
             const token = sessionStorage.getItem('token');
+            sessionStorage.setItem("image_load_start_time", Date.now());
             const response = await axios.get('http://localhost:8080/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
                 headers:{
                     'Authorization':token
                 }
             });
+            sessionStorage.setItem("image_load_time", Date.now() - sessionStorage.getItem("image_load_start_time"));
             setImage(response.data.image);
         }catch(err){
             console.error(err);
         }
     }
+
+    const updateBoxes = () => {
+        let img = document.getElementById('map'); 
+        setImageSize({"width":img.width, "height":img.height});
+    };
 
     const handleImageLoad = () => {
         let img = document.getElementById('map'); 
@@ -85,6 +85,7 @@ const UploadedMapPage = () => {
 
         try{
             const token = sessionStorage.getItem('token');
+            sessionStorage.setItem("path_calculation_start_time", Date.now());
             const response = await axios.post('http://localhost:8080/api/calculate_path', 
             { 
                 "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
@@ -95,9 +96,11 @@ const UploadedMapPage = () => {
                     'Authorization':token
                 }
             });
-
-            updateDisplayedImage(response.data.path_image_url)
+            console.log(response.data);
+            sessionStorage.setItem("path_calculation_time", Date.now() - sessionStorage.getItem("path_calculation_start_time"));
+            updateDisplayedImage(response.data.path_image_url + "?" + Date.now());
         }catch(err){
+            sessionStorage.setItem("path_calculation_time", Date.now() - sessionStorage.getItem("path_calculation_start_time"));
             console.error(err);
         }
     }
@@ -116,45 +119,48 @@ const UploadedMapPage = () => {
         
         <h1>Building: {image.building.name}, Floor: {image.floor < 0 ? "B" : ""}{Math.abs(image.floor)}</h1>
         <div>
-        <div>
-            <select onChange={handleSelectStart}>
-                <option value="">Select a starting room</option>
-                {image.anchors.map(anchor => {
-                    if(anchor.classType === 'classroom' && anchor.tagData.length > 0){
-                        return <option value={JSON.stringify(anchor)}>{anchor.tagData.map(t => t.text).join(', ')}</option>;
-                    }
-                })}
-            </select>
-            <select onChange={handleSelectEnd}>
-                <option value="">Select a destination room</option>
-                {image.anchors.map(anchor => {
-                    if(anchor.classType === 'classroom' && anchor.tagData.length > 0){
-                        return <option value={JSON.stringify(anchor)}>{anchor.tagData.map(t => t.text).join(', ')}</option>;
-                    }
-                })}
-            </select>
-        </div>
+            <div>
+                {"From: "}
+                <select onChange={handleSelectStart}>
+                    <option value="">Select a starting room</option>
+                    {image.anchors.map(anchor => {
+                        if((anchor.classType === 'classroom') && anchor.tagData.length > 0){
+                            return <option value={JSON.stringify(anchor)}>{anchor.tagData.map(t => t.text).join(', ')}</option>;
+                        }
+                    })}
+                </select>
+                {" to "}
+                <select onChange={handleSelectEnd}>
+                    <option value="">Select a destination room</option>
+                    {image.anchors.map(anchor => {
+                        if(anchor.classType === 'classroom' && anchor.tagData.length > 0){
+                            return <option value={JSON.stringify(anchor)}>{anchor.tagData.map(t => t.text).join(', ')}</option>;
+                        }
+                    })}
+                </select>
+            </div>
 
-        <div className="mapBox" style={{position:"relative"}}>
-            <img id="map" alt="A map" src={image.url} style={{width:"50%"}} onLoad={handleImageLoad}/>
+            <div className="mapBox" style={{position:"relative"}}>
+                <img id="map" alt="A map" src={image.url} style={{width:"50%"}} onLoad={handleImageLoad}/>
 
-            <svg style={{position:"absolute", left:"25%", top:0, width:"50%", height:"100%", pointerEvents: "none"}}>
-            
-            {!hideBoxes && <>{image.anchors.map(anchor => {   
-                if(anchor.classType === 'classroom'){
-                    return <rect x={anchor.x * (imageSize.width / originalImageSize.width) - 0.5 * anchor.width * (imageSize.width / originalImageSize.width)} y={anchor.y * (imageSize.height / originalImageSize.height) - 0.5 * anchor.height * (imageSize.height / originalImageSize.height)} width={anchor.width * (imageSize.width / originalImageSize.width)} height={anchor.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"black", strokeWidth:"2"}} />
-                }
-            })}</>}
-            {startRoom && <rect x={startRoom.x * (imageSize.width / originalImageSize.width) - 0.5 * startRoom.width * (imageSize.width / originalImageSize.width)} y={startRoom.y * (imageSize.height / originalImageSize.height) - 0.5 * startRoom.height * (imageSize.height / originalImageSize.height)} width={startRoom.width * (imageSize.height / originalImageSize.height)} height={startRoom.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"green", strokeWidth:"2"}} />}
-            {endRoom && <rect x={endRoom.x * (imageSize.width / originalImageSize.width) - 0.5 * endRoom.width * (imageSize.width / originalImageSize.width)} y={endRoom.y * (imageSize.height / originalImageSize.height) - 0.5 * endRoom.height * (imageSize.height / originalImageSize.height)} width={endRoom.width * (imageSize.height / originalImageSize.height)} height={endRoom.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"red", strokeWidth:"2"}} />}
-            
-            </svg>  
-            
-        </div>
+                <svg style={{position:"absolute", left:"25%", top:0, width:"50%", height:"100%", pointerEvents: "none"}}>
+                
+                {!hideBoxes && <>{image.anchors.map(anchor => {   
+                    if(anchor.classType === 'classroom'){
+                        return <rect x={anchor.x * (imageSize.width / originalImageSize.width) - 0.5 * anchor.width * (imageSize.width / originalImageSize.width)} y={anchor.y * (imageSize.height / originalImageSize.height) - 0.5 * anchor.height * (imageSize.height / originalImageSize.height)} width={anchor.width * (imageSize.width / originalImageSize.width)} height={anchor.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"black", strokeWidth:"2"}} />
+                    }
+                })}</>}
+                {startRoom && <rect x={startRoom.x * (imageSize.width / originalImageSize.width) - 0.5 * startRoom.width * (imageSize.width / originalImageSize.width)} y={startRoom.y * (imageSize.height / originalImageSize.height) - 0.5 * startRoom.height * (imageSize.height / originalImageSize.height)} width={startRoom.width * (imageSize.height / originalImageSize.height)} height={startRoom.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"green", strokeWidth:"2"}} />}
+                {endRoom && <rect x={endRoom.x * (imageSize.width / originalImageSize.width) - 0.5 * endRoom.width * (imageSize.width / originalImageSize.width)} y={endRoom.y * (imageSize.height / originalImageSize.height) - 0.5 * endRoom.height * (imageSize.height / originalImageSize.height)} width={endRoom.width * (imageSize.height / originalImageSize.height)} height={endRoom.height * (imageSize.height / originalImageSize.height)} style={{fill:"transparent", stroke:"red", strokeWidth:"2"}} />}
+                
+                </svg>  
+                
+            </div>
         </div>
         <div><input type="checkbox" id="showBoxes" name="showBoxes" onChange={() => {sethideBoxes(!hideBoxes);}} /><label for="showBoxes">Hide unselected boxes</label></div>
         <div>        
             <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} />
+            <input className="reset" type="button" value="Reset" onClick={() => {updateDisplayedImage(image.url)}} />
             <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
         </div>
     </div>);

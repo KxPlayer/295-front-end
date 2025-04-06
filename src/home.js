@@ -8,7 +8,7 @@ const HomePage = () => {
 
     return (
     <div>
-        <h1>TITLE</h1>
+        <h1>AI Indoor Pathfinding App</h1>
         <p>A computer vision-based pathfinding web application.</p>
         {sessionStorage.getItem("token") != null && <input type="button" class="upload" value="Upload a map" onClick={() => {navigate('/upload');}} />}
         {sessionStorage.getItem("token") != null && <br></br>}
