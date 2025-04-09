@@ -3,11 +3,6 @@ import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-// need to get the relative location of the rooms to pass to the backend
-// add loading message after the user clicks find path
-// add boxes to highlight selected rooms -> start and end points, remove the circles
-// remove setting start and end points
-
 const UploadedMapPage = () => {
     const [image, setImage] = useState(null);
     const [startRoom, setStartRoom] = useState(null);
@@ -31,7 +26,7 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("image_load_start_time", Date.now());
-            const response = await axios.get('http://localhost:8080/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
+            const response = await axios.get('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
                 headers:{
                     'Authorization':token
                 }
@@ -86,7 +81,7 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("path_calculation_start_time", Date.now());
-            const response = await axios.post('http://localhost:8080/api/calculate_path', 
+            const response = await axios.post('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/calculate_path', 
             { 
                 "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
                 "end_point": [parseInt(endRoom.tagData[0].y * originalImageSize.height), parseInt(endRoom.tagData[0].x * originalImageSize.width)],

@@ -3,8 +3,6 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-// need message if register failed
-
 const RegistrationPage = () => {
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
@@ -12,7 +10,6 @@ const RegistrationPage = () => {
 
     const navigate = useNavigate();
 
-    // should check for valid email, username and password and call before handleClick? in handleClick?
     const checkValidInputs = () => {
         if(email === "" || username === "" || password === ""){
             return false;
@@ -21,13 +18,25 @@ const RegistrationPage = () => {
     }
 
     const handleClick = async () => {
+        if(!checkValidInputs()){
+            alert("Please fill out all fields.");
+            return;
+        }
+
+        if(!email.includes('@')){
+            alert("Please enter a valid email address.");
+            return;
+        }
+
         try{
-            const response = await axios.post('http://localhost:8080/api/user', { email, username, password });
+            const response = await axios.post('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/user', { email, username, password });
             console.log(response.data);
-            // should check for valid registration before redirecting?
             navigate('/home');
         }catch(err){
             console.error(err);
+            if(err.response && err.response.status === 400){
+                alert("Username or email already exists."); 
+            }
         }
     }
 

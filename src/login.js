@@ -10,13 +10,25 @@ const LoginPage = () => {
     const navigate = useNavigate();
 
     const handleClick = async () => {
+
+        if(email === "" || password === ""){
+            alert("Please fill out all fields.");
+            return;
+        }
+        
+        if(!email.includes('@')){
+            alert("Please enter a valid email address.");
+            return;
+        }
+
         try{
-            const response = await axios.post('http://localhost:8080/api/user/login', { email, password });
-            // check if token is correct?
+            const response = await axios.post('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/user/login', { email, password });
             const { token } = response.data;
             sessionStorage.setItem('token', token);
             if(token){
                 navigate('/');
+            }else{
+                alert("Login failed. Please check your email and password.");
             }
         }catch(err){
             console.error(err);

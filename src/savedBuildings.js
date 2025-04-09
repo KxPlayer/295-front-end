@@ -18,7 +18,7 @@ const SavedBuildingsPage = () => {
         try{
             const token = sessionStorage.getItem('token');
 
-            const response = await axios.get('http://localhost:8080/api/buildings', {
+            const response = await axios.get('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/buildings', {
                 headers: {
                     'Authorization': token
                 },
@@ -36,7 +36,7 @@ const SavedBuildingsPage = () => {
         try{
             const token = sessionStorage.getItem('token');
 
-            await axios.delete('http://localhost:8080/api/building/' + buildingID, {
+            await axios.delete('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/building/' + buildingID, {
                 headers: {
                     'Authorization': token
                 },
