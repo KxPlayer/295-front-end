@@ -31,12 +31,9 @@ const RegistrationPage = () => {
         try{
             const response = await axios.post('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/user', { email, username, password });
             console.log(response.data);
-            navigate('/home');
+            navigate('/');
         }catch(err){
             console.error(err);
-            if(err.response && err.response.status === 400){
-                alert("Username or email already exists."); 
-            }
         }
     }
 

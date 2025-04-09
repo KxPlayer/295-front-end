@@ -59,7 +59,8 @@ const UploadedMapPage = () => {
             setStartRoom(null);
             return;
         }
-        console.log(event.target.value);
+        //console.log(event.target.value);
+        console.log("new start room");
         setStartRoom(JSON.parse(event.target.value));
     }
 
@@ -68,13 +69,24 @@ const UploadedMapPage = () => {
             setEndRoom(null);
             return;
         }
-        console.log(event.target.value);
+        //console.log(event.target.value);
+        console.log("new destination room");
         setEndRoom(JSON.parse(event.target.value));
     }
 
     const handleFindPath = async () => {
-        if(!startRoom || !endRoom){
-            console.log("Start and end points not set");
+        if(!startRoom && !endRoom){
+            alert("Please select a starting room and a destination room.");
+            return;
+        }
+        
+        if(!startRoom){
+            alert("Please select a starting room.");
+            return;
+        }
+
+        if(!endRoom){
+            alert("Please select a destination room.");
             return;
         }
 
@@ -155,7 +167,7 @@ const UploadedMapPage = () => {
         <div><input type="checkbox" id="showBoxes" name="showBoxes" onChange={() => {sethideBoxes(!hideBoxes);}} /><label for="showBoxes">Hide unselected boxes</label></div>
         <div>        
             <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} />
-            <input className="reset" type="button" value="Reset" onClick={() => {updateDisplayedImage(image.url)}} />
+            <input className="reset" type="button" value="Reset Image" onClick={() => {updateDisplayedImage(image.url)}} />
             <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
         </div>
     </div>);
