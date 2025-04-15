@@ -29,7 +29,7 @@ const RegistrationPage = () => {
         }
 
         try{
-            const response = await axios.post('http://flask-env.eba-qjhqw3t2.us-east-2.elasticbeanstalk.com/api/user', { email, username, password });
+            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/user', { email, username, password });
             console.log(response.data);
             navigate('/');
         }catch(err){

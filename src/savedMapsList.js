@@ -18,7 +18,7 @@ const SavedMapsListPage = () => {
         try{
             const token = sessionStorage.getItem('token');
 
-            const response = await axios.get('http://flask-env.eba-qjhqw3t2.us-east-2.elasticbeanstalk.com/api/building/' + location.state.buildingId, {
+            const response = await axios.get('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/building/' + location.state.buildingId, {
                 headers: {
                     'Authorization': token
                 }
@@ -42,7 +42,7 @@ const SavedMapsListPage = () => {
         try{
             const token = sessionStorage.getItem('token');
 
-            await axios.delete('http://flask-env.eba-qjhqw3t2.us-east-2.elasticbeanstalk.com/api/image/' + imageId, {
+            await axios.delete('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/image/' + imageId, {
                 headers: {
                     'Authorization': token
                 },
