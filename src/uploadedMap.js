@@ -26,7 +26,7 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("image_load_start_time", Date.now());
-            const response = await axios.get('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
+            const response = await axios.get('http://flask-env.eba-qjhqw3t2.us-east-2.elasticbeanstalk.com/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
                 headers:{
                     'Authorization':token
                 }
@@ -93,7 +93,7 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("path_calculation_start_time", Date.now());
-            const response = await axios.post('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/calculate_path', 
+            const response = await axios.post('http://flask-env.eba-qjhqw3t2.us-east-2.elasticbeanstalk.com/api/calculate_path', 
             { 
                 "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
                 "end_point": [parseInt(endRoom.tagData[0].y * originalImageSize.height), parseInt(endRoom.tagData[0].x * originalImageSize.width)],

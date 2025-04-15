@@ -22,7 +22,7 @@ const LoginPage = () => {
         }
 
         try{
-            const response = await axios.post('http://flask-env.eba-63h3zsef.us-east-2.elasticbeanstalk.com/api/user/login', { email, password });
+            const response = await axios.post('http://flask-env.eba-qjhqw3t2.us-east-2.elasticbeanstalk.com/api/user/login', { email, password });
             const { token } = response.data;
             sessionStorage.setItem('token', token);
             if(token){
