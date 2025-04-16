@@ -10,6 +10,7 @@ const UploadedMapPage = () => {
     const [hideBoxes, sethideBoxes] = useState(false);
     const [imageSize, setImageSize] = useState({"width":0, "height":0});
     const [originalImageSize, setOriginalImageSize] = useState({"width":0, "height":0});
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -93,6 +94,7 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("path_calculation_start_time", Date.now());
+            setLoading(true);
             const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/calculate_path', 
             { 
                 "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
@@ -103,12 +105,14 @@ const UploadedMapPage = () => {
                     'Authorization':token
                 }
             });
+            setLoading(false);
             console.log(response.data);
             sessionStorage.setItem("path_calculation_time", Date.now() - sessionStorage.getItem("path_calculation_start_time"));
             updateDisplayedImage(response.data.path_image_url + "?" + Date.now());
         }catch(err){
             sessionStorage.setItem("path_calculation_time", Date.now() - sessionStorage.getItem("path_calculation_start_time"));
             console.error(err);
+            setLoading(false);
         }
     }
 
@@ -166,8 +170,8 @@ const UploadedMapPage = () => {
         </div>
         <div><input type="checkbox" id="showBoxes" name="showBoxes" onChange={() => {sethideBoxes(!hideBoxes);}} /><label for="showBoxes">Hide unselected boxes</label></div>
         <div>        
-            <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} />
-            <input className="reset" type="button" value="Reset Image" onClick={() => {updateDisplayedImage(image.url)}} />
+            <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} disabled={loading}/>
+            <input className="reset" type="button" value="Reset Image" onClick={() => {updateDisplayedImage(image.url)}} disabled={loading}/>
             <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
         </div>
     </div>);

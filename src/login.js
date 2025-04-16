@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -22,7 +23,9 @@ const LoginPage = () => {
         }
 
         try{
+            setLoading(true);
             const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/user/login', { email, password });
+            setLoading(false);
             const { token } = response.data;
             sessionStorage.setItem('token', token);
             if(token){
@@ -32,6 +35,7 @@ const LoginPage = () => {
             }
         }catch(err){
             console.error(err);
+            setLoading(false);
             if(err.response && err.response.status === 401){
                 alert("Invalid email or password.");
             }
@@ -50,7 +54,7 @@ const LoginPage = () => {
         <input onChange={ev => setPassword(ev.target.value)}/>
         </div>
         <div>
-        <input class="login" type="button" value="Submit" onClick={handleClick} />
+        <input class="login" type="button" value="Submit" onClick={handleClick} disabled={loading}/>
         </div> 
     </div>
 };

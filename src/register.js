@@ -7,6 +7,7 @@ const RegistrationPage = () => {
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -29,10 +30,13 @@ const RegistrationPage = () => {
         }
 
         try{
+            setLoading(true);
             const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/user', { email, username, password });
+            setLoading(false);
             console.log(response.data);
             navigate('/');
         }catch(err){
+            setLoading(false);
             console.error(err);
         }
     }
@@ -53,7 +57,7 @@ const RegistrationPage = () => {
         <input onChange={ev => setPassword(ev.target.value)}/>
         </div>
         <div>
-        <input class="register" type="button" value="Submit" onClick={handleClick} />
+        <input class="register" type="button" value="Submit" onClick={handleClick} disabled={loading}/>
         </div> 
     </div>
 };
