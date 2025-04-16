@@ -10,6 +10,7 @@ const UploadedMapPage = () => {
     const [hideBoxes, sethideBoxes] = useState(false);
     const [imageSize, setImageSize] = useState({"width":0, "height":0});
     const [originalImageSize, setOriginalImageSize] = useState({"width":0, "height":0});
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -26,7 +27,7 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("image_load_start_time", Date.now());
-            const response = await axios.get('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
+            const response = await axios.get('http://localhost:8080/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
                 headers:{
                     'Authorization':token
                 }
@@ -93,7 +94,8 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("path_calculation_start_time", Date.now());
-            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/calculate_path', 
+            setLoading(true);
+            const response = await axios.post('http://localhost:8080/api/calculate_path', 
             { 
                 "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
                 "end_point": [parseInt(endRoom.tagData[0].y * originalImageSize.height), parseInt(endRoom.tagData[0].x * originalImageSize.width)],
@@ -106,9 +108,11 @@ const UploadedMapPage = () => {
             console.log(response.data);
             sessionStorage.setItem("path_calculation_time", Date.now() - sessionStorage.getItem("path_calculation_start_time"));
             updateDisplayedImage(response.data.path_image_url + "?" + Date.now());
+            setLoading(false);
         }catch(err){
             sessionStorage.setItem("path_calculation_time", Date.now() - sessionStorage.getItem("path_calculation_start_time"));
             console.error(err);
+            setLoading(false);
         }
     }
 

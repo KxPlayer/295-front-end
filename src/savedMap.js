@@ -10,6 +10,7 @@ const SavedMapPage = () => {
     const [hideBoxes, sethideBoxes] = useState(false);
     const [imageSize, setImageSize] = useState({"width":0, "height":0});
     const [originalImageSize, setOriginalImageSize] = useState({"width":0, "height":0});
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -28,7 +29,7 @@ const SavedMapPage = () => {
     const loadImage = async () => {
         try{
             const token = sessionStorage.getItem('token');
-            const response = await axios.get('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/image/' + location.state.mapId, {
+            const response = await axios.get('http://localhost:8080/api/image/' + location.state.mapId, {
                 headers: {
                     'Authorization': token
                 }
@@ -94,7 +95,7 @@ const SavedMapPage = () => {
 
         try{
             const token = sessionStorage.getItem('token');
-            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/calculate_path', 
+            const response = await axios.post('http://localhost:8080/api/calculate_path', 
             { 
                 "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
                 "end_point": [parseInt(endRoom.tagData[0].y * originalImageSize.height), parseInt(endRoom.tagData[0].x * originalImageSize.width)],

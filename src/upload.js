@@ -20,7 +20,7 @@ const UploadPage = () => {
     const loadBuildings = async () => {
       try{
         const token = sessionStorage.getItem('token');
-        const response = await axios.get('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/buildings', {
+        const response = await axios.get('http://localhost:8080/api/buildings', {
           headers: {
             'Authorization': token
           }
@@ -54,7 +54,7 @@ const UploadPage = () => {
       try{
         const token = sessionStorage.getItem('token');
         
-        const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/building', 
+        const response = await axios.post('http://localhost:8080/api/building', 
         { 
           "name": buildingName 
         }, 
@@ -81,7 +81,7 @@ const UploadPage = () => {
           try {
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("upload_start_time", Date.now());
-            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/upload_image', formData, {
+            const response = await axios.post('http://localhost:8080/api/upload_image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': token
@@ -133,13 +133,13 @@ const UploadPage = () => {
       return (
         <div>
           <input type="button" value="Back" onClick={() => {navigate('/')}} />
-          <p>Provide a building name, floor number, and an image of the map you want to do pathfinding on. Avoid glare and make sure the image is right-side up to ensure proper results!</p>
+          <p style={{textAlign: 'justify', textJustify: 'inter-word', marginLeft: '2%', marginRight: '2%'}}>Provide a building name, floor number, and an image of the map you want to do pathfinding on. Processing will be slow if the image is too large or contains things that aren't the map. Avoid glare and make sure the image is right-side up to get accurate results!</p>
           <div>
             <span>Building name: </span>
             <input onChange={ev => updateBuilding(ev.target.value)}/>
             <span> </span>
             <span>Floor number: </span>
-            <input style={{width:50}}type="number" onChange={ev => updateFloor(ev.target.value)} />
+            <input style={{width:50}} type="number" onChange={ev => updateFloor(ev.target.value)} />
           </div>
           <br></br>
           <div>
