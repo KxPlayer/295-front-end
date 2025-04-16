@@ -133,7 +133,7 @@ const UploadPage = () => {
       return (
         <div>
           <input type="button" value="Back" onClick={() => {navigate('/')}} />
-          <p>Provide a building name, floor number, and an image of the map you want to do pathfinding on. Avoid glare and make sure the image is right-side up to ensure proper results!</p>
+          <p style={{textAlign: 'justify', textJustify: 'inter-word', marginLeft: '2%', marginRight: '2%'}}>Provide a building name, floor number, and an image of the map you want to do pathfinding on. Processing will be slow if the image is too large or contains things that aren't the map. Avoid glare and make sure the image is right-side up to get accurate results!</p>
           <div>
             <span>Building name: </span>
             <input onChange={ev => updateBuilding(ev.target.value)}/>
