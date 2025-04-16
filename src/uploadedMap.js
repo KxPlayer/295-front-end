@@ -170,8 +170,8 @@ const UploadedMapPage = () => {
         </div>
         <div><input type="checkbox" id="showBoxes" name="showBoxes" onChange={() => {sethideBoxes(!hideBoxes);}} /><label for="showBoxes">Hide unselected boxes</label></div>
         <div>        
-            <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} />
-            <input className="reset" type="button" value="Reset Image" onClick={() => {updateDisplayedImage(image.url)}} />
+            <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} disabled={loading} />
+            <input className="reset" type="button" value="Reset Image" onClick={() => {updateDisplayedImage(image.url)}} disabled={loading} />
             <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
         </div>
     </div>);
