@@ -20,7 +20,7 @@ const UploadPage = () => {
     const loadBuildings = async () => {
       try{
         const token = sessionStorage.getItem('token');
-        const response = await axios.get('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/buildings', {
+        const response = await axios.get('https://pathfinder-816282289217.us-central1.run.app/api/buildings', {
           headers: {
             'Authorization': token
           }
@@ -54,7 +54,7 @@ const UploadPage = () => {
       try{
         const token = sessionStorage.getItem('token');
         
-        const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/building', 
+        const response = await axios.post('https://pathfinder-816282289217.us-central1.run.app/api/building', 
         { 
           "name": buildingName 
         }, 
@@ -81,7 +81,7 @@ const UploadPage = () => {
           try {
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("upload_start_time", Date.now());
-            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/upload_image', formData, {
+            const response = await axios.post('https://pathfinder-816282289217.us-central1.run.app/api/upload_image', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': token

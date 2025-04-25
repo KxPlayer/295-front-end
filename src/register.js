@@ -31,7 +31,7 @@ const RegistrationPage = () => {
 
         try{
             setLoading(true);
-            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/user', { email, username, password });
+            const response = await axios.post('https://pathfinder-816282289217.us-central1.run.app/api/user', { email, username, password });
             setLoading(false);
             console.log(response.data);
             navigate('/');

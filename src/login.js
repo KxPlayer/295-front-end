@@ -24,7 +24,7 @@ const LoginPage = () => {
 
         try{
             setLoading(true);
-            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/user/login', { email, password });
+            const response = await axios.post('https://pathfinder-816282289217.us-central1.run.app/api/user/login', { email, password });
             setLoading(false);
             const { token } = response.data;
             sessionStorage.setItem('token', token);

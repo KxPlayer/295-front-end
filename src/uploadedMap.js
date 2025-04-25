@@ -27,7 +27,7 @@ const UploadedMapPage = () => {
         try{
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("image_load_start_time", Date.now());
-            const response = await axios.get('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
+            const response = await axios.get('https://pathfinder-816282289217.us-central1.run.app/api/image/' + sessionStorage.getItem("uploaded_image_id"),{
                 headers:{
                     'Authorization':token
                 }
@@ -95,11 +95,11 @@ const UploadedMapPage = () => {
             const token = sessionStorage.getItem('token');
             sessionStorage.setItem("path_calculation_start_time", Date.now());
             setLoading(true);
-            const response = await axios.post('http://flask-api-env.eba-5srt8mpy.us-east-2.elasticbeanstalk.com/api/calculate_path', 
+            const response = await axios.post('https://pathfinder-816282289217.us-central1.run.app/api/calculate_path', 
             { 
                 "start_point": [parseInt(startRoom.tagData[0].y * originalImageSize.height), parseInt(startRoom.tagData[0].x * originalImageSize.width)],
                 "end_point": [parseInt(endRoom.tagData[0].y * originalImageSize.height), parseInt(endRoom.tagData[0].x * originalImageSize.width)],
-                "s3_image_url": image.url
+                "image_id": sessionStorage.getItem("uploaded_image_id")
             },{
                 headers:{
                     'Authorization':token
@@ -172,7 +172,7 @@ const UploadedMapPage = () => {
         <div>        
             <input className="path" type="button" value="Find Path" onClick={() => {handleFindPath();}} disabled={loading}/>
             <input className="reset" type="button" value="Reset Image" onClick={() => {updateDisplayedImage(image.url)}} disabled={loading}/>
-            <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} />
+            <input className="saved" type="button" value="Saved Maps" onClick={() => {navigate('/savedBuildings', {state:{previous:'/uploadedMap'}})}} disabled={loading}/>
         </div>
     </div>);
 
