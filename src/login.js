@@ -51,7 +51,7 @@ const LoginPage = () => {
         </div>
         <div>
         <span>Password: </span>
-        <input onChange={ev => setPassword(ev.target.value)}/>
+        <input type="password" onChange={ev => setPassword(ev.target.value)}/>
         </div>
         <div>
         <input class="login" type="button" value="Submit" onClick={handleClick} disabled={loading}/>
