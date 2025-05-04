@@ -41,6 +41,20 @@ const SavedMapPage = () => {
         }
     };
 
+    const sortRoomOptions = () => {
+        image.anchors.sort((a, b) => {
+            let aString = a.tagData.map(t => t.text).join(', ');
+            let bString = b.tagData.map(t => t.text).join(', ');
+            if(aString < bString){
+                return -1;
+            }else if(aString > bString){
+                return 1;
+            }else{
+                return 0;
+            }
+        })
+    }
+
     const updateBoxes = () => {
         let img = document.getElementById('map'); 
         setImageSize({"width":img.width, "height":img.height});
@@ -126,6 +140,10 @@ const SavedMapPage = () => {
 
     if(image == null){
         return <h1>LOADING SAVED MAP...</h1>
+    }
+
+    if(image){
+        sortRoomOptions();
     }
 
     return (

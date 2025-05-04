@@ -39,6 +39,20 @@ const UploadedMapPage = () => {
         }
     }
 
+    const sortRoomOptions = () => {
+        image.anchors.sort((a, b) => {
+            let aString = a.tagData.map(t => t.text).join(', ');
+            let bString = b.tagData.map(t => t.text).join(', ');
+            if(aString < bString){
+                return -1;
+            }else if(aString > bString){
+                return 1;
+            }else{
+                return 0;
+            }
+        })
+    }
+
     const updateBoxes = () => {
         let img = document.getElementById('map'); 
         setImageSize({"width":img.width, "height":img.height});
@@ -122,6 +136,10 @@ const UploadedMapPage = () => {
 
     if(image == null){
         return <h1>LOADING UPLOADED IMAGE...</h1>
+    }
+
+    if(image){
+        sortRoomOptions();
     }
 
     return (
