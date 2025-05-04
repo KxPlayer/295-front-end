@@ -75,5 +75,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 firebase login
 firebase init hosting
 npm run build
+firebase hosting:sites:list
+firebase projects:list
 firebase deploy --only hosting
 ```
